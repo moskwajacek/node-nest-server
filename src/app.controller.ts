@@ -1,7 +1,7 @@
-import {Body, Controller, Get, NotFoundException, Param, Post, Query} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Post, Query} from '@nestjs/common';
 import { AppService } from './app.service';
-
-
+import { ContactModel } from './models';
+import { ApiImplicitQuery } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
@@ -23,6 +23,7 @@ export class AppController {
   }
 
   @Get('contacts/:id')
+  @ApiImplicitQuery({name: 'q', required: false})
   getContact(@Param('id') id: string) {
     const contact = this.contacts.find(c => c.id === parseInt(id, 10));
     if (contact) {
@@ -38,7 +39,7 @@ export class AppController {
   }
 
   @Post('contacts')
-  postContacts(@Body() data) {
+    postContacts(@Body() data: ContactModel) {
     const contact = {
       name: '',
       ...data,
@@ -46,5 +47,17 @@ export class AppController {
     };
     this.contacts.push(contact);
     return contact;
+  }
+
+  @Post()
+  @HttpCode(204)
+  create() {
+    return 'Ta akcja zwraca status 204';
+  }
+
+  @Delete('contacts/:id')
+  deleteContacts(@Param('id') id: string) {
+    this.contacts = this.contacts.filter(c => c.id !== parseInt(id, 10));
+    return {id};
   }
 }
